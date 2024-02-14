@@ -20,27 +20,18 @@ ical.objectHandlers['END'] = function (val, params, curr, stack) {
 		if (curr.rrule) {
 			var rule = curr.rrule.replace('RRULE:', '');
 			if (rule.indexOf('DTSTART') === -1) {
-
-				if (curr.start.length === 8) {
-					var comps = /^(\d{4})(\d{2})(\d{2})$/.exec(curr.start);
-					if (comps) {
-						curr.start = new Date(comps[1], comps[2] - 1, comps[3]);
-					}
-				}
-
-
-				if (typeof curr.start.toISOString === 'function') {
-					try {
-						rule += ';DTSTART=' + curr.start.toISOString().replace(/[-:]/g, '');
-						rule = rule.replace(/\.[0-9]{3}/, '');
-					} catch (error) {
-						console.error("ERROR when trying to convert to ISOString", error);
-					}
-                } else {
-                    console.error("No toISOString function in curr.start", curr.start);
-				}
+        // reduction the DTSTART
+        if (curr.start && curr.start.val) {
+          let DTSTART = ['DTSTART'].concat(curr.start.params).join(';') + ':' + curr.start.val;
+          curr.rrule = DTSTART + '\n;' + curr.rrule;
+        }
 			}
-			curr.rrule = rrule.fromString(rule);
+
+      try {
+        curr.rrule = rrule.fromString(rule);
+      } catch (e) {
+        console.error('ERROR when parse rrule: ', curr.rrule);
+      }
 		}
 	}
   return originalEnd.call(this, val, params, curr, stack);
