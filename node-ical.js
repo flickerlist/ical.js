@@ -18,14 +18,15 @@ ical.objectHandlers['END'] = function (val, params, curr, stack) {
 	// due to the subtypes.
 	if ((val === "VEVENT") || (val === "VTODO") || (val === "VJOURNAL")) {
 		if (curr.rrule) {
-			var rule = curr.rrule.replace('RRULE:', '');
-			if (rule.indexOf('DTSTART') === -1) {
-        // reduction the DTSTART
+      var rule = curr.rrule;
+      if (rule.indexOf('DTSTART') === -1) {
+        // reduction the DTSTART, not support 'VALUE=DATE/DATE-TIME'
         if (curr.start && curr.start.val) {
-          let DTSTART = ['DTSTART'].concat(curr.start.params).join(';') + ':' + curr.start.val;
-          curr.rrule = DTSTART + '\n;' + curr.rrule;
+          var support_params = (curr.start.params || []).filter((item) => /TZID\=/i.test(item));
+          var DTSTART = ['DTSTART'].concat(support_params).join(';') + ':' + curr.start.val;
+          rule = DTSTART + '\n' + rule;
         }
-			}
+      }
 
       try {
         curr.rrule = rrule.fromString(rule);
