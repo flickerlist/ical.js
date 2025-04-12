@@ -52,6 +52,7 @@
     "node": ">=10"
   },
   "scripts": {
+    "install": "npm run build",
     "test": "npm run test-unit && npm run test-acceptance",
     "test-unit": "c8 mocha",
     "test-acceptance": "mocha test/acceptance/*_test.js",
